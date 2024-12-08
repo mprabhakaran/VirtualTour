@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hampi Virtual Tour</title>
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/"
+          }
+        }
+      </script>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+        }
+        .instructions {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px 20px;
+            font-family: Arial, sans-serif;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="instructions">
+        Use your mouse to look around. Scroll to zoom in/out. Explore the Taj Mahal!
+    </div>
+    <script type="module">
+        import * as THREE from 'three';
+        
+        // Scene, Camera, and Renderer Setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Adding a Panorama Texture for the Virtual Tour
+        const textureLoader = new THREE.TextureLoader();
+        const texture = textureLoader.load('./Images/Pano_ajanta.jpg'); // Replace with your panorama image
+        const geometry = new THREE.SphereGeometry(500, 60, 40);
+        geometry.scale(-1, 1, 1); // Invert the sphere to look from the inside
+        const material = new THREE.MeshBasicMaterial({ map: texture });
+        const sphere = new THREE.Mesh(geometry, material);
+        scene.add(sphere);
+
+        // Initial Camera Position
+        camera.position.set(0, 0, 0.1);
+
+        // Controls for Mouse Movement (Basic)
+        let isUserInteracting = false,
+            onPointerDownMouseX = 0, onPointerDownMouseY = 0,
+            lon = 0, onPointerDownLon = 0,
+            lat = 0, onPointerDownLat = 0,
+            phi = 0, theta = 0;
+
+        document.addEventListener('mousedown', function(event) {
+            isUserInteracting = true;
+            onPointerDownMouseX = event.clientX;
+            onPointerDownMouseY = event.clientY;
+            onPointerDownLon = lon;
+            onPointerDownLat = lat;
+        });
+
+        document.addEventListener('mousemove', function(event) {
+            if (isUserInteracting) {
+                lon = (onPointerDownMouseX - event.clientX) * 0.1 + onPointerDownLon;
+                lat = (event.clientY - onPointerDownMouseY) * 0.1 + onPointerDownLat;
+            }
+        });
+
+        document.addEventListener('mouseup', function() {
+            isUserInteracting = false;
+        });
+
+        // Zoom Controls
+        document.addEventListener('wheel', function(event) {
+            camera.fov += event.deltaY * 0.05;
+            camera.updateProjectionMatrix();
+        });
+
+        // Animation Loop
+        function animate() {
+            requestAnimationFrame(animate);
+            lat = Math.max(-85, Math.min(85, lat));
+            phi = THREE.MathUtils.degToRad(90 - lat);
+            theta = THREE.MathUtils.degToRad(lon);
+            camera.lookAt(
+                Math.sin(phi) * Math.cos(theta),
+                Math.cos(phi),
+                Math.sin(phi) * Math.sin(theta)
+            );
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Adjust on Window Resize
+        window.addEventListener('resize', function() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+</html>
