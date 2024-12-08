@@ -32,11 +32,36 @@
             border-radius: 5px;
             font-size: 14px;
         }
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 15px;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.8);
+            color: black;
+        }
     </style>
 </head>
 <body>
+    <script> 
+        function goBack() {
+            window.location.href = './index.html'; // Replace 'index.html' with your home page file name or URL
+        }
+    </script>
+    <button class="back-button" onclick="goBack()">Back to Home</button>
+    <audio src="./Audios/Redfort.mp3" autoplay></audio>
     <div class="instructions">
-        Use your mouse to look around. Scroll to zoom in/out. Explore the Taj Mahal!
+        Use your mouse to look around. Scroll to zoom in/out. Explore the Red fort!
     </div>
     <script type="module">
         import * as THREE from 'three';
@@ -103,6 +128,7 @@
                 Math.cos(phi),
                 Math.sin(phi) * Math.sin(theta)
             );
+            sphere.rotation.y += 0.001;
             renderer.render(scene, camera);
         }
         animate();
